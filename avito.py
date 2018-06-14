@@ -1,9 +1,5 @@
 
 # coding: utf-8
-
-# In[24]:
-
-
 # Load all the libraries necessary for the project 
 
 import numpy as np # linear algebra
@@ -24,17 +20,12 @@ offline.init_notebook_mode()
 import plotly.tools as tls
 color = sns.color_palette()
 from sklearn import preprocessing, model_selection, metrics
-#import lightgbm as lgb
 
 # Avito data files are available in the "C:\akmisra\courses\MachineLearning\avito-data" directory.
 import os
 print(os.listdir("C:\\akmisra\\courses\\MachineLearning\\avito-data"))
 
 # Results are saved as output.
-
-
-# In[2]:
-
 
 # Read the necessary data
 print('Reading Data ...')
@@ -48,43 +39,19 @@ periods_test = pd.read_csv("C:\\akmisra\\courses\\MachineLearning\\avito-data\\p
 print('periods_test data size: ', periods_test.shape)
 print('Finished Reading Data ...')
 
-
-# In[3]:
-
-
 # Check the data in train dataset
 train.head()
-
-
-# In[4]:
-
 
 # test dataset should not have deal probability column
 test.head()
 
-
-# In[5]:
-
-
 # Also check periods_train dataset
 periods_train.head()
-
-
-# In[6]:
-
 
 # Training dataset overview
 train.info()
 
-
-# In[7]:
-
-
 train.describe()
-
-
-# In[8]:
-
 
 # Use df.isnull.sum() to get the count of missing values in each column of df.
 # Use df.isnull.count() to get the count of rows for each column in df 
@@ -93,19 +60,11 @@ percent = (train.isnull().sum()/train.isnull().count()*100).sort_values(ascendin
 missing_train_data = pd.concat([total, percent], axis=1, keys=["Total", "Percent"])
 missing_train_data.head(10)
 
-
-# In[9]:
-
-
 # Also check if we have missing values in Periods_train dataset
 total = periods_train.isnull().sum().sort_values(ascending=False)
 percent = (periods_train.isnull().sum()/periods_train.isnull().count()*100).sort_values(ascending=False)
 missing_train_data = pd.concat([total, percent], axis=1, keys=["Total", "Percent"])
 missing_train_data.head()
-
-
-# In[10]:
-
 
 # data exploration - let us explore some of the data in the dataset
 # deal probability is our target variable with float value between 0 and 1
@@ -122,11 +81,7 @@ plt.ylabel('likelihood that ad actually sold something', fontsize=12)
 plt.title('Distribution of likelihood that ad sold something')
 plt.show()
 
-
 # The plots show that almost 1000000 ads had a probability of 0 (means sold nothing), while few had a probability of 1, and the rest were in the middle.
-
-# In[11]:
-
 
 # Check the distribution of non-zero deal_probability
 train['deal_class'] = train['deal_probability'].apply(lambda x: ">=0.5" if x >= 0.5 else "<0.5")
@@ -141,11 +96,7 @@ py.iplot(fig)
 
 del train['deal_class']
 
-
 # 88% of the non-zero deal_probability ads have greater than 50% chances of selling something, while 12% have less than 50% chances.
-
-# In[12]:
-
 
 # convert the Russian columns into English using Yandex Translator and merge into train dataset
 from io import StringIO
@@ -183,10 +134,6 @@ region,region_en
 region_df = pd.read_csv(temp_region)
 train = pd.merge(train, region_df, how="left", on="region")
 
-
-# In[13]:
-
-
 # Use Pie Charts to plot the regional distribution of ads
 regions_in_eng = train['region_en'].value_counts()
 labels = regions_in_eng.index
@@ -197,10 +144,6 @@ data = [trace]
 fig = go.Figure(data=data, layout=layout)
 py.iplot(fig, filename="region")
 
-
-# In[15]:
-
-
 # plot deal_probability by the regions
 plt.figure(figsize=(12,8))
 sns.boxplot(y='region_en', x='deal_probability', data=train)
@@ -210,11 +153,7 @@ plt.title('Deal Probability by Region')
 plt.xticks(rotation='vertical')
 plt.show()
 
-
 # The top 3 regions are: Kresnodar Krai, Sverdlovsk oblast, and Rostov oblast
-
-# In[16]:
-
 
 # Convert parent_category_name from Russian to English
 temp_parent_category = StringIO("""
@@ -233,10 +172,6 @@ parent_category_name,parent_category_name_en
 temp_df = pd.read_csv(temp_parent_category)
 train = pd.merge(train, temp_df, on="parent_category_name", how="left")
 
-
-# In[17]:
-
-
 # Check parent category name distribution
 temp_parent_category_colmn = train['parent_category_name_en'].value_counts()
 labels = (np.array(temp_parent_category_colmn.index))
@@ -252,10 +187,6 @@ data = [trace]
 fig = go.Figure(data=data, layout=layout)
 py.iplot(fig, filename="parentcategory")
 
-
-# In[18]:
-
-
 plt.figure(figsize=(12,8))
 sns.boxplot(x="parent_category_name_en", y="deal_probability", data=train)
 plt.ylabel('Deal probability', fontsize=12)
@@ -264,11 +195,7 @@ plt.title("Deal probability by parent category", fontsize=14)
 plt.xticks(rotation='vertical')
 plt.show()
 
-
 # 46.4% of the ads are for Personal belongings, 11.9% are for home and garden and 11.5% for consumer electronics.
-
-# In[19]:
-
 
 # Consider distribution of category name after converting category_names from Russian to English
 temp_category_name = StringIO("""
@@ -325,10 +252,6 @@ category_name,category_name_en
 temp_df = pd.read_csv(temp_category_name)
 train = pd.merge(train, temp_df, on="category_name", how="left")
 
-
-# In[20]:
-
-
 category_name_cnt = train['category_name_en'].value_counts()
 trace = go.Bar(
     y=category_name_cnt.index[::-1],
@@ -349,16 +272,12 @@ data = [trace]
 fig = go.Figure(data=data, layout=layout)
 py.iplot(fig, filename="category name")
 
-
 # Top 3 categories are:
 # 
 #     1. Clothes, shoes, accessories
 #     2. Children's clothing and footwear
 #     3. Goods for children and toys
 # 
-
-# In[21]:
-
 
 # Fill the missing values in price column with Mean and check the distribution
 train["price_new"] = train["price"].values
@@ -369,10 +288,6 @@ sns.distplot(np.log1p(train["price_new"].values), bins=100, kde=False)
 plt.xlabel('Log of price', fontsize=12)
 plt.title("Log of Price Histogram", fontsize=14)
 plt.show()
-
-
-# In[22]:
-
 
 # Check the number of words in the title
 train["title_nwords"] = train["title"].apply(lambda x: len(x.split()))
@@ -397,13 +312,9 @@ data = [trace]
 fig = go.Figure(data=data, layout=layout)
 py.iplot(fig, filename="title_nwords") 
 
-
 # Mostly titles have 2 or 3 words.
 
 # Check the variability in the title column by taking the TF-IDF of the title, getting the top SVD of this TF-IDF and then plotting the distribution of SVD components with deal_probability
-
-# In[25]:
-
 
 ### TFIDF Vectorizer ###
 tfidf_vec = TfidfVectorizer(ngram_range=(1,1))
@@ -422,10 +333,6 @@ test_svd.columns = ['svd_title_'+str(i+1) for i in range(n_comp)]
 train = pd.concat([train, train_svd], axis=1)
 test = pd.concat([test, test_svd], axis=1)
 del full_tfidf, train_tfidf, test_tfidf, train_svd, test_svd
-
-
-# In[26]:
-
 
 # 1st svd comp #
 plt.figure(figsize=(8,8))
@@ -451,11 +358,7 @@ plt.xlabel('Third SVD component on Title', fontsize=12)
 plt.title("Deal Probability distribution for Third SVD component on title", fontsize=15)
 plt.show()
 
-
 # Plot the number of words in description column after filling the missing values
-
-# In[27]:
-
 
 ## Filling missing values ##
 train["description"].fillna("NA", inplace=True)
@@ -483,19 +386,12 @@ data = [trace]
 fig = go.Figure(data=data, layout=layout)
 py.iplot(fig, filename="desc_nwords")  
 
-
-# In[ ]:
-
-
-In order to build the model, we will :
-
-    Create a new feature for week day
-    Label encode the categorical variables
-    Drop the un-needed columns.
-
-
-# In[28]:
-
+# In order to build the model, we will :
+# 
+#     Create a new feature for week day
+#     Label encode the categorical variables
+#     Drop the un-needed columns.
+# 
 
 # Target and ID variable
 train_y = train['deal_probability'].values
@@ -517,4 +413,50 @@ cols_to_drop = ['item_id', 'user_id', 'title', 'description', 'activation_date',
 train_X = train.drop(cols_to_drop + ["region_en", "parent_category_name_en", "category_name_en", "price_new", "deal_probability"], axis=1)
 test_X = test.drop(cols_to_drop, axis=1)
 
+# Try XGBoost
+import xgboost as xgb
+dev_X = train_X.iloc[:-200000,:]
+val_X = train_X.iloc[-200000:,:]
+dev_y = train_y[:-200000]
+val_y = train_y[-200000:]
+print(dev_X.shape, val_X.shape, test_X.shape)
 
+params = {'eta': 0.3,
+          'tree_method': "hist",
+          'grow_policy': "lossguide",
+          'max_leaves': 1400,  
+          'max_depth': 0, 
+          'subsample': 0.9, 
+          'colsample_bytree': 0.7, 
+          'colsample_bylevel':0.7,
+          'min_child_weight':0,
+          'alpha':4,
+          'objective': 'reg:logistic', 
+          'eval_metric': 'rmse', 
+          'random_state': 99, 
+          'silent': True}
+
+tr_data = xgb.DMatrix(dev_X, dev_y)
+va_data = xgb.DMatrix(val_X, val_y)
+
+watchlist = [(tr_data, 'train'), (va_data, 'valid')]
+
+model = xgb.train(params, tr_data, 1000, watchlist, maximize=False, early_stopping_rounds = 25, verbose_eval=5)
+
+# Top features
+from xgboost import plot_importance
+fig, ax = plt.subplots(figsize=(12,18))
+plot_importance(model, max_num_features=50, height=0.8, ax=ax)
+ax.grid(False)
+plt.title("XGB - Feature Importance", fontsize=15)
+plt.show()
+plt.gcf().savefig('feature_importance_xgb.png')
+
+# Price seems to be the most important feature, followed by city, and title.
+
+# We will try to improve the model by:
+# 
+#     Adding more new features
+#     Tuning the parameters as these are not tuned
+#     Blending with other models.
+# 
