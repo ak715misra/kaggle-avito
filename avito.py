@@ -1,5 +1,6 @@
 
 # coding: utf-8
+
 # Load all the libraries necessary for the project 
 
 import numpy as np # linear algebra
@@ -20,22 +21,19 @@ offline.init_notebook_mode()
 import plotly.tools as tls
 color = sns.color_palette()
 from sklearn import preprocessing, model_selection, metrics
-
-# Avito data files are available in the "C:\akmisra\courses\MachineLearning\avito-data" directory.
-import os
-print(os.listdir("C:\\akmisra\\courses\\MachineLearning\\avito-data"))
+#import lightgbm as lgb
 
 # Results are saved as output.
 
 # Read the necessary data
 print('Reading Data ...')
-train = pd.read_csv("C:\\akmisra\\courses\\MachineLearning\\avito-data\\train.csv", parse_dates=["activation_date"])
+train = pd.read_csv("train.csv", parse_dates=["activation_date"])
 print('training data size: ', train.shape)
-test = pd.read_csv("C:\\akmisra\\courses\\MachineLearning\\avito-data\\test.csv", parse_dates=["activation_date"])
+test = pd.read_csv("test.csv", parse_dates=["activation_date"])
 print('test data size: ', test.shape)
-periods_train = pd.read_csv("C:\\akmisra\\courses\\MachineLearning\\avito-data\\periods_train.csv", parse_dates=["activation_date", "date_from", "date_to"])
+periods_train = pd.read_csv("periods_train.csv", parse_dates=["activation_date", "date_from", "date_to"])
 print('periods_train data size: ', periods_train.shape)
-periods_test = pd.read_csv("C:\\akmisra\\courses\\MachineLearning\\avito-data\\periods_test.csv", parse_dates=["activation_date", "date_from", "date_to"])
+periods_test = pd.read_csv("periods_test.csv", parse_dates=["activation_date", "date_from", "date_to"])
 print('periods_test data size: ', periods_test.shape)
 print('Finished Reading Data ...')
 
@@ -81,6 +79,7 @@ plt.ylabel('likelihood that ad actually sold something', fontsize=12)
 plt.title('Distribution of likelihood that ad sold something')
 plt.show()
 
+
 # The plots show that almost 1000000 ads had a probability of 0 (means sold nothing), while few had a probability of 1, and the rest were in the middle.
 
 # Check the distribution of non-zero deal_probability
@@ -95,6 +94,7 @@ fig = go.Figure(data=data, layout=layout)
 py.iplot(fig)
 
 del train['deal_class']
+
 
 # 88% of the non-zero deal_probability ads have greater than 50% chances of selling something, while 12% have less than 50% chances.
 
@@ -195,6 +195,7 @@ plt.title("Deal probability by parent category", fontsize=14)
 plt.xticks(rotation='vertical')
 plt.show()
 
+
 # 46.4% of the ads are for Personal belongings, 11.9% are for home and garden and 11.5% for consumer electronics.
 
 # Consider distribution of category name after converting category_names from Russian to English
@@ -272,6 +273,7 @@ data = [trace]
 fig = go.Figure(data=data, layout=layout)
 py.iplot(fig, filename="category name")
 
+
 # Top 3 categories are:
 # 
 #     1. Clothes, shoes, accessories
@@ -311,6 +313,7 @@ layout = go.Layout(
 data = [trace]
 fig = go.Figure(data=data, layout=layout)
 py.iplot(fig, filename="title_nwords") 
+
 
 # Mostly titles have 2 or 3 words.
 
@@ -358,6 +361,7 @@ plt.xlabel('Third SVD component on Title', fontsize=12)
 plt.title("Deal Probability distribution for Third SVD component on title", fontsize=15)
 plt.show()
 
+
 # Plot the number of words in description column after filling the missing values
 
 ## Filling missing values ##
@@ -386,6 +390,7 @@ data = [trace]
 fig = go.Figure(data=data, layout=layout)
 py.iplot(fig, filename="desc_nwords")  
 
+
 # In order to build the model, we will :
 # 
 #     Create a new feature for week day
@@ -413,7 +418,7 @@ cols_to_drop = ['item_id', 'user_id', 'title', 'description', 'activation_date',
 train_X = train.drop(cols_to_drop + ["region_en", "parent_category_name_en", "category_name_en", "price_new", "deal_probability"], axis=1)
 test_X = test.drop(cols_to_drop, axis=1)
 
-# Try XGBoost
+# Trying to implement XGBoost Model
 import xgboost as xgb
 dev_X = train_X.iloc[:-200000,:]
 val_X = train_X.iloc[-200000:,:]
@@ -439,9 +444,9 @@ params = {'eta': 0.3,
 tr_data = xgb.DMatrix(dev_X, dev_y)
 va_data = xgb.DMatrix(val_X, val_y)
 
-watchlist = [(tr_data, 'train'), (va_data, 'valid')]
-
-model = xgb.train(params, tr_data, 1000, watchlist, maximize=False, early_stopping_rounds = 25, verbose_eval=5)
+eval_list = [(tr_data, 'train'), (va_data, 'valid')]
+num_boosting_itr = 1000
+model = xgb.train(params, tr_data, num_boosting_itr, eval_list, maximize=False, early_stopping_rounds = 25, verbose_eval=5)
 
 # Top features
 from xgboost import plot_importance
@@ -451,6 +456,7 @@ ax.grid(False)
 plt.title("XGB - Feature Importance", fontsize=15)
 plt.show()
 plt.gcf().savefig('feature_importance_xgb.png')
+
 
 # Price seems to be the most important feature, followed by city, and title.
 
