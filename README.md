@@ -43,7 +43,8 @@ This will open the Jupyter Notebook software and project file in your browser.
 
 ### Data
 
-The Avito data is broken into train and test datasets. The train datasets are train.csv, periods_train.csv, train_active.csv, while test datasets are test.csv, periods_test.csv, test_active.csv. In addition, the ads images are provided in train_jpg.zip. There are more than 1.5 million data points, with each datapoint having 18 features. Due to large size of the datasets (~ 9 Gigabytes), we are using only train, test, periods_train and periods_test datasets for this project. These datasets can be found on Kaggle site (https://www.kaggle.com/c/avito-demand-prediction/data).
+The Avito data is broken into train and test datasets. The train datasets are train.csv, periods_train.csv, train_active.csv, while test datasets are test.csv, periods_test.csv, test_active.csv. In addition, the ads images are provided in train_jpg.zip. There are more than 1.5 million data points, with each datapoint having 18 features. Due to large size of the datasets (~ 9 Gigabytes), we are using only train, test, periods_train and periods_test datasets for this project. These four datasets (csv files) can be downloaded from Kaggle site (https://www.kaggle.com/c/avito-demand-prediction/data) in the current directory where we are
+running the script from.
 
 **Features**
 1.	`item_id`: Ad id
